@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 {
     'name': 'Job Portal - Candidate Portal & Recruitment Dashboard',
-    'version': '17.0.1.5.2',
+    'version': '17.0.1.5.4',
     'category': 'Human Resources/Recruitment',
     'summary': 'Candidate self-service job portal on the website and a Recruitment '
                'dashboard inside Odoo for recruiters',
