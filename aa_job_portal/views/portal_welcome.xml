@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Welcome popup: once per signed-in session, on regular website pages, for portal users -->
+    <template id="welcome_popup" name="Candidate Welcome Popup" inherit_id="website.layout">
+        <xpath expr="//div[@id='wrapwrap']" position="inside">
+            <t t-if="not no_header and not editable and not translatable and request and request.env.user.share and not request.env.user._is_public()">
+                <t t-set="aajp_w" t-value="request.env.user.partner_id._aajp_welcome_values()"/>
+                <div t-if="aajp_w" class="aajp-welcome" role="dialog" aria-modal="true" aria-labelledby="aajp_welcome_title">
+                    <input type="checkbox" id="aajp_welcome_close" class="aajp-welcome-toggle" aria-label="Close"/>
+                    <label for="aajp_welcome_close" class="aajp-welcome-backdrop" aria-hidden="true"/>
+                    <div class="aajp-welcome-card">
+                        <label for="aajp_welcome_close" class="aajp-welcome-x" title="Close">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                        </label>
+                        <div class="aajp-welcome-hero">
+                            <img class="aajp-welcome-avatar" t-attf-src="/web/image/res.partner/#{request.env.user.partner_id.id}/avatar_128" alt=""/>
+                            <div class="aajp-welcome-kicker">Candidate Dashboard</div>
+                            <h2 id="aajp_welcome_title">
+                                <t t-if="aajp_w['is_new']">Welcome, <t t-esc="aajp_w['first_name']"/>!</t>
+                                <t t-else="">Welcome back, <t t-esc="aajp_w['first_name']"/>!</t>
+                            </h2>
+                            <p t-if="aajp_w['is_new']">Your candidate account is ready. Browse <t t-esc="aajp_w['open_jobs']"/> open position(s) and apply in one click with your CV.</p>
+                            <p t-else="">Here is where your job search stands today.</p>
+                        </div>
+                        <div class="aajp-welcome-body">
+                            <div class="aajp-welcome-stats">
+                                <a href="/my/jobs/applied" class="aajp-welcome-stat">
+                                    <strong t-esc="aajp_w['applied']"/><span>Applications</span>
+                                </a>
+                                <a href="/my/jobs/applied?status=shortlist" class="aajp-welcome-stat">
+                                    <strong t-esc="aajp_w['shortlisted']"/><span>Shortlisted</span>
+                                </a>
+                                <a href="/my/jobs/notifications" t-attf-class="aajp-welcome-stat #{'is-alert' if aajp_w['unread'] else ''}">
+                                    <strong t-esc="aajp_w['unread']"/><span>New updates</span>
+                                </a>
+                            </div>
+                            <div t-if="aajp_w['next_job']" class="aajp-welcome-row aajp-welcome-row-event">
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="6" width="14" height="12" rx="2"/><polygon points="22 8 16 12 22 16 22 8"/></svg>
+                                <span>Interview for <b t-esc="aajp_w['next_job']"/> — <t t-esc="aajp_w['next_when']"/></span>
+                            </div>
+                            <div t-if="aajp_w['latest_job']" class="aajp-welcome-row">
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+                                <span>Latest: <b t-esc="aajp_w['latest_job']"/></span>
+                                <span t-attf-class="aajp-status aajp-status-#{aajp_w['latest_tone']} ms-auto" t-esc="aajp_w['latest_label']"/>
+                            </div>
+                            <div class="aajp-welcome-actions">
+                                <a href="/my/jobs" class="aajp-welcome-btn aajp-welcome-btn-primary">Open Candidate Dashboard</a>
+                                <a t-if="aajp_w['is_new']" href="/my/jobs/browse" class="aajp-welcome-btn">Browse jobs</a>
+                                <label t-else="" for="aajp_welcome_close" class="aajp-welcome-btn">Maybe later</label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </t>
+        </xpath>
+    </template>
+</odoo>

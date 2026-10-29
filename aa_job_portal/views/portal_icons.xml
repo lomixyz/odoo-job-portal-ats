@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Company logo or initial -->
+    <template id="company_logo" name="Candidate Portal Company Logo">
+        <span class="aajp-logo">
+            <img t-if="company.logo" t-attf-src="/web/binary/company_logo?company=#{company.id}" t-att-alt="company.name"/>
+            <span t-else="" class="aajp-logo-initial" t-esc="company_initial(company)"/>
+        </span>
+    </template>
+
+    <!-- Job card used on the dashboard, browse and saved pages -->
+    <template id="job_card" name="Candidate Portal Job Card">
+        <t t-set="is_applied" t-value="job.id in aajp_applied_job_ids"/>
+        <t t-set="is_saved" t-value="job.id in aajp_saved_job_ids"/>
+        <t t-set="is_filled" t-value="job._aa_is_filled()"/>
+        <article t-attf-class="aajp-job #{'is-filled' if is_filled else ''}">
+            <div t-if="is_filled" class="aajp-ribbon"><span>Position Filled</span></div>
+            <div class="aajp-job-head">
+                <t t-call="aa_job_portal.company_logo"><t t-set="company" t-value="job.company_id"/></t>
+                <div class="aajp-job-heading">
+                    <a class="aajp-job-title" t-attf-href="/my/jobs/job/#{job.id}" t-att-title="job.name" t-esc="job.name"/>
+                    <div class="aajp-job-company" t-esc="job.company_id.name"/>
+                    <div class="aajp-job-loc"><t t-out="icon('map-pin', 15)"/><span t-esc="job_location(job)"/></div>
+                </div>
+                <form t-attf-action="/my/jobs/save/#{job.id}" method="post" class="aajp-save-form">
+                    <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
+                    <input type="hidden" name="next" t-att-value="request.httprequest.full_path"/>
+                    <button type="submit" t-attf-class="aajp-save #{'is-saved' if is_saved else ''}"
+                            t-att-title="'Remove from saved' if is_saved else 'Save job'">
+                        <t t-out="icon('bookmark', 18)"/>
+                    </button>
+                </form>
+            </div>
+            <div class="aajp-job-body">
+                <div class="aajp-tags">
+                    <span t-if="employment_type(job)" class="aajp-tag" t-esc="employment_type(job)"/>
+                    <span t-if="job.department_id" class="aajp-tag" t-esc="job.department_id.name"/>
+                    <span t-if="is_applied" class="aajp-tag aajp-tag-success">Applied</span>
+                    <span t-if="is_filled" class="aajp-tag aajp-tag-filled">Position filled</span>
+                </div>
+                <p class="aajp-job-snippet" t-esc="job_snippet(job)"/>
+                <div class="aajp-job-foot">
+                    <t t-set="open_count" t-value="0 if is_filled else job._aa_open_positions()"/>
+                    <span class="aajp-muted small" t-if="open_count">
+                        <t t-esc="open_count"/> open position<t t-if="open_count != 1">s</t>
+                    </span>
+                    <a class="aajp-link ms-auto" t-attf-href="/my/jobs/job/#{job.id}">View <t t-out="icon('arrow-right', 16)"/></a>
+                </div>
+            </div>
+        </article>
+    </template>
+
+    <!-- Status pill for an application -->
+    <template id="status_badge" name="Candidate Portal Status Badge">
+        <t t-set="st" t-value="applicant._aa_portal_status()"/>
+        <span t-attf-class="aajp-status aajp-status-#{st[1]}" t-esc="st[0]"/>
+    </template>
+
+    <!-- Empty state -->
+    <template id="empty_state" name="Candidate Portal Empty State">
+        <div class="aajp-empty">
+            <span class="aajp-empty-ico"><t t-out="icon(empty_icon or 'inbox', 28)"/></span>
+            <h3 t-esc="empty_title"/>
+            <p t-esc="empty_text"/>
+            <t t-out="0"/>
+        </div>
+    </template>
+</odoo>

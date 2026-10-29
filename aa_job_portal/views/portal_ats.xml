@@ -1,0 +1,232 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Score ring: set ring_value, ring_grade (or ring_tone), optional ring_size / ring_suffix before calling -->
+    <template id="ats_ring" name="ATS Score Ring">
+        <t t-set="ring_tone_cls" t-value="ring_tone or ats_tone(ring_grade)"/>
+        <div t-attf-class="aajp-ring aajp-ring-#{ring_size or 'md'} aajp-tone-#{ring_tone_cls}"
+             t-attf-style="background: conic-gradient(currentColor #{(ring_value or 0) * 3.6}deg, #e9eef5 0deg);">
+            <div class="aajp-ring-inner">
+                <span class="aajp-ring-value" t-out="ring_value or 0"/>
+                <span class="aajp-ring-max" t-out="ring_suffix or '/100'"/>
+            </div>
+        </div>
+    </template>
+
+    <!-- ============================== CV SCORE PAGE ============================== -->
+    <template id="page_ats" name="Candidate Portal CV ATS Score">
+        <t t-call="aa_job_portal.layout">
+            <t t-set="head_icon" t-value="'gauge'"/>
+            <t t-set="head_title">CV Score (ATS)</t>
+            <t t-set="head_sub">How Applicant Tracking Systems read your CV</t>
+            <t t-call="aa_job_portal.page_header"/>
+
+            <div t-if="checked" class="aajp-alert aajp-alert-success">Your new CV was uploaded and checked.</div>
+            <div t-if="error == 'format'" class="aajp-alert aajp-alert-danger">Please upload your CV as PDF, Word, ODT, RTF or TXT (max. 10 MB).</div>
+            <div t-if="error == 'empty'" class="aajp-alert aajp-alert-danger">Please choose a file to upload.</div>
+
+            <div t-if="not report" class="aajp-card aajp-section">
+                <div class="aajp-empty">
+                    <span class="aajp-empty-ico"><t t-out="icon('gauge', 28)"/></span>
+                    <h3>Check your CV against ATS standards</h3>
+                    <p>Upload your CV (PDF or DOCX recommended) to get a score out of 100 and a list of fixes.</p>
+                    <form action="/my/jobs/ats/upload" method="post" enctype="multipart/form-data" class="aajp-ats-upload">
+                        <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
+                        <input type="file" name="cv_file" class="form-control" accept=".pdf,.doc,.docx,.odt,.rtf,.txt" required="required"/>
+                        <button type="submit" class="aajp-btn aajp-btn-primary"><t t-out="icon('upload', 18)"/> Upload &amp; check</button>
+                    </form>
+                </div>
+            </div>
+
+            <t t-if="report">
+                <!-- Summary -->
+                <div class="aajp-card aajp-ats-hero">
+                    <t t-set="ring_value" t-value="report.score"/>
+                    <t t-set="ring_grade" t-value="report.grade"/>
+                    <t t-set="ring_size" t-value="'lg'"/>
+                    <t t-set="ring_tone" t-value="False"/>
+                    <t t-set="ring_suffix" t-value="'/100'"/>
+                    <t t-call="aa_job_portal.ats_ring"/>
+                    <div class="aajp-ats-hero-body">
+                        <div t-attf-class="aajp-status aajp-status-#{ats_tone(report.grade)}" t-out="report._aa_grade_label()"/>
+                        <h2 class="aajp-ats-hero-title">
+                            <t t-if="report.grade == 'excellent'">Your CV is ATS-ready</t>
+                            <t t-elif="report.grade == 'good'">Your CV reads well — a few fixes will make it stronger</t>
+                            <t t-elif="report.grade == 'fair'">Your CV needs work before most ATS can rank it well</t>
+                            <t t-else="">Most ATS will struggle to read this CV</t>
+                        </h2>
+                        <div class="aajp-ats-counts">
+                            <span class="aajp-ats-count aajp-tone-success"><t t-out="icon('check-circle', 16)"/> <t t-out="report.passed_count"/> passed</span>
+                            <span class="aajp-ats-count aajp-tone-warning"><t t-out="icon('alert-circle', 16)"/> <t t-out="report.warning_count"/> warnings</span>
+                            <span class="aajp-ats-count aajp-tone-danger"><t t-out="icon('x-circle', 16)"/> <t t-out="report.failed_count"/> failed</span>
+                        </div>
+                        <div class="aajp-muted small">
+                            <t t-out="icon('file', 14)"/> <t t-out="report.name"/> · <t t-out="(report.file_format or '').upper()"/> ·
+                            <t t-out="report.word_count"/> words · <t t-out="report.page_count"/> page(s) · checked <t t-out="fmt_d(report.create_date)"/>
+                        </div>
+                    </div>
+                    <form action="/my/jobs/ats/upload" method="post" enctype="multipart/form-data" class="aajp-ats-reupload">
+                        <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
+                        <label class="aajp-btn aajp-btn-primary mb-0">
+                            <t t-out="icon('upload', 18)"/> Upload improved CV
+                            <input type="file" name="cv_file" class="d-none" accept=".pdf,.doc,.docx,.odt,.rtf,.txt" onchange="this.form.submit()"/>
+                        </label>
+                        <a t-if="report.attachment_id" t-attf-href="/my/jobs/cv/#{report.attachment_id.id}" class="aajp-btn aajp-btn-light">Download CV</a>
+                    </form>
+                </div>
+
+                <div class="aajp-two-col">
+                    <!-- Top fixes -->
+                    <section class="aajp-card aajp-section">
+                        <div class="aajp-section-head">
+                            <span class="aajp-tile aajp-tile-soft"><t t-out="icon('sparkles', 20)"/></span>
+                            <div class="flex-grow-1"><h2>Top fixes</h2><p>Biggest score gains first</p></div>
+                        </div>
+                        <t t-set="tips" t-value="report._aa_tips()"/>
+                        <div t-if="not tips" class="aajp-muted">Nothing to fix — great job!</div>
+                        <ol t-else="" class="aajp-ats-tips">
+                            <li t-foreach="tips" t-as="tip">
+                                <span t-attf-class="aajp-ats-dot aajp-tone-#{'danger' if tip['status'] == 'fail' else 'warning'}"/>
+                                <div>
+                                    <div class="aajp-row-title" t-out="tip['title']"/>
+                                    <div class="aajp-muted small" t-out="tip['tip']"/>
+                                </div>
+                                <span class="aajp-ats-gain">+<t t-out="tip['max'] - tip['points']"/></span>
+                            </li>
+                        </ol>
+                    </section>
+
+                    <!-- Job match -->
+                    <section class="aajp-card aajp-section">
+                        <div class="aajp-section-head">
+                            <span class="aajp-tile aajp-tile-soft"><t t-out="icon('target', 20)"/></span>
+                            <div class="flex-grow-1"><h2>Match with a job</h2><p>Keywords from the job description found in your CV</p></div>
+                        </div>
+                        <form action="/my/jobs/ats" method="get" class="mb-3">
+                            <select name="job" class="form-select form-control" onchange="this.form.submit()">
+                                <option value="">Choose an open position…</option>
+                                <option t-foreach="jobs" t-as="j" t-att-value="j.id" t-att-selected="'selected' if selected_job and j.id == selected_job.id else None" t-out="j.name"/>
+                            </select>
+                        </form>
+                        <div t-if="match" class="aajp-ats-match">
+                            <t t-set="ring_value" t-value="match['score']"/>
+                            <t t-set="ring_tone" t-value="'success' if match['score'] &gt;= 70 else ('warning' if match['score'] &gt;= 40 else 'danger')"/>
+                            <t t-set="ring_size" t-value="'sm'"/>
+                            <t t-set="ring_suffix" t-value="'%'"/>
+                            <t t-call="aa_job_portal.ats_ring"/>
+                            <div class="flex-grow-1 min-w-0">
+                                <div class="aajp-row-title mb-1" t-out="match['job'].name"/>
+                                <div class="aajp-ats-chips">
+                                    <span t-foreach="match['matched']" t-as="k" class="aajp-ats-chip is-hit"><t t-out="icon('check', 12)"/> <t t-out="k"/></span>
+                                    <span t-foreach="match['missing']" t-as="k" class="aajp-ats-chip is-miss" t-out="k"/>
+                                </div>
+                                <div t-if="match['missing']" class="aajp-muted small mt-2">Add the missing keywords that truly describe your experience — ATS rank CVs by these terms.</div>
+                                <a t-attf-href="/my/jobs/job/#{match['job'].id}" class="aajp-link mt-2">View job <t t-out="icon('arrow-right', 15)"/></a>
+                            </div>
+                        </div>
+                        <div t-else="" class="aajp-muted">Pick a job to see which of its keywords your CV covers.</div>
+                    </section>
+                </div>
+
+                <!-- Detailed checks -->
+                <section t-foreach="report._aa_grouped_checks()" t-as="group" class="aajp-card aajp-section">
+                    <div class="aajp-section-head">
+                        <div class="flex-grow-1"><h2 t-out="group['label']"/></div>
+                        <span class="aajp-ats-points"><t t-out="group['points']"/> / <t t-out="group['max']"/></span>
+                    </div>
+                    <div class="aajp-ats-bar"><span t-attf-style="width: #{group['pct']}%"/></div>
+                    <ul class="aajp-list aajp-ats-checks">
+                        <li t-foreach="group['checks']" t-as="c" class="aajp-ats-check">
+                            <span t-attf-class="aajp-ats-icon aajp-tone-#{'success' if c['status'] == 'pass' else ('warning' if c['status'] == 'warn' else 'danger')}">
+                                <t t-out="icon('check-circle' if c['status'] == 'pass' else ('alert-circle' if c['status'] == 'warn' else 'x-circle'), 20)"/>
+                            </span>
+                            <div class="flex-grow-1 min-w-0">
+                                <div class="aajp-row-title" t-out="c['title']"/>
+                                <div class="aajp-muted small" t-out="c['message']"/>
+                                <div t-if="c['tip'] and c['status'] != 'pass'" class="aajp-ats-tip"><t t-out="icon('sparkles', 13)"/> <t t-out="c['tip']"/></div>
+                            </div>
+                            <span class="aajp-ats-pts"><t t-out="c['points']"/>/<t t-out="c['max']"/></span>
+                        </li>
+                    </ul>
+                </section>
+
+                <div class="aajp-note small">
+                    <strong>What is checked?</strong> The rules that make a résumé readable by Applicant Tracking Systems:
+                    a text-based PDF or DOCX file, contact details in the body, standard section headings
+                    (Summary, Experience, Education, Skills), a simple single-column layout without tables, text boxes, images
+                    or header/footer content, standard fonts, 1–2 pages, dated roles, bullet points with action verbs and
+                    measurable results, no unnecessary personal data, and keywords that match the job.
+                </div>
+            </t>
+        </t>
+    </template>
+
+    <!-- ============================== DASHBOARD CARD ============================== -->
+    <template id="page_dashboard_ats" name="Candidate Dashboard: ATS card" inherit_id="aa_job_portal.page_dashboard">
+        <xpath expr="//div[hasclass('aajp-stats')]" position="after">
+            <a href="/my/jobs/ats" class="aajp-card aajp-ats-strip">
+                <t t-if="ats_report">
+                    <t t-set="ring_value" t-value="ats_report.score"/>
+                    <t t-set="ring_grade" t-value="ats_report.grade"/>
+                    <t t-set="ring_size" t-value="'sm'"/>
+                    <t t-set="ring_tone" t-value="False"/>
+                    <t t-set="ring_suffix" t-value="'/100'"/>
+                    <t t-call="aa_job_portal.ats_ring"/>
+                    <div class="flex-grow-1 min-w-0">
+                        <div class="aajp-row-title">Your CV ATS score · <span t-out="ats_report._aa_grade_label()"/></div>
+                        <t t-set="top_tip" t-value="ats_report._aa_tips(1)"/>
+                        <div class="aajp-muted small text-truncate">
+                            <t t-if="top_tip">Next fix: <t t-out="top_tip[0]['tip']"/></t>
+                            <t t-else="">Your CV follows ATS best practices.</t>
+                        </div>
+                    </div>
+                </t>
+                <t t-else="">
+                    <span class="aajp-tile aajp-tile-blue"><t t-out="icon('gauge', 22)"/></span>
+                    <div class="flex-grow-1 min-w-0">
+                        <div class="aajp-row-title">Check your CV against ATS standards</div>
+                        <div class="aajp-muted small">Upload your CV to get a score out of 100 and personalised fixes.</div>
+                    </div>
+                </t>
+                <span class="aajp-link text-nowrap">View report <t t-out="icon('arrow-right', 15)"/></span>
+            </a>
+        </xpath>
+    </template>
+
+    <!-- ============================== APPLY PAGE ============================== -->
+    <template id="page_apply_ats" name="Candidate Apply: ATS preview" inherit_id="aa_job_portal.page_apply">
+        <xpath expr="//form[hasclass('aajp-form')]" position="before">
+            <div t-if="ats_report" class="aajp-card aajp-section aajp-ats-apply">
+                <div class="aajp-ats-apply-item">
+                    <t t-set="ring_value" t-value="ats_report.score"/>
+                    <t t-set="ring_grade" t-value="ats_report.grade"/>
+                    <t t-set="ring_size" t-value="'sm'"/>
+                    <t t-set="ring_tone" t-value="False"/>
+                    <t t-set="ring_suffix" t-value="'/100'"/>
+                    <t t-call="aa_job_portal.ats_ring"/>
+                    <div><div class="aajp-row-title">CV ATS score</div><div class="aajp-muted small" t-out="ats_report._aa_grade_label()"/></div>
+                </div>
+                <div t-if="ats_match" class="aajp-ats-apply-item">
+                    <t t-set="ring_value" t-value="ats_match[0]"/>
+                    <t t-set="ring_tone" t-value="'success' if ats_match[0] &gt;= 70 else ('warning' if ats_match[0] &gt;= 40 else 'danger')"/>
+                    <t t-set="ring_suffix" t-value="'%'"/>
+                    <t t-call="aa_job_portal.ats_ring"/>
+                    <div class="min-w-0">
+                        <div class="aajp-row-title">Match with this job</div>
+                        <div t-if="ats_match[2]" class="aajp-muted small text-truncate">Missing: <t t-out="', '.join(ats_match[2][:6])"/></div>
+                        <div t-else="" class="aajp-muted small">All key terms found</div>
+                    </div>
+                </div>
+                <a t-attf-href="/my/jobs/ats?job=#{job.id}" class="aajp-link ms-auto">Improve before applying <t t-out="icon('arrow-right', 15)"/></a>
+            </div>
+        </xpath>
+    </template>
+
+    <!-- ============================== PROFILE PAGE ============================== -->
+    <template id="page_profile_ats" name="Candidate Profile: ATS chip" inherit_id="aa_job_portal.page_profile">
+        <xpath expr="//input[@name='cv_file']" position="before">
+            <a t-if="ats_report" href="/my/jobs/ats" t-attf-class="aajp-ats-badge aajp-tone-#{ats_tone(ats_report.grade)}">
+                <t t-out="icon('gauge', 16)"/> ATS score <strong t-out="ats_report.score"/>/100 · <t t-out="ats_report._aa_grade_label()"/> — view report
+            </a>
+        </xpath>
+    </template>
+</odoo>

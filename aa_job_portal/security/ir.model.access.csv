@@ -1,0 +1,5 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_aa_job_saved_recruiter,aa.job.saved.recruiter,model_aa_job_saved,hr_recruitment.group_hr_recruitment_user,1,1,1,1
+access_aa_job_notification_recruiter,aa.job.notification.recruiter,model_aa_job_notification,hr_recruitment.group_hr_recruitment_user,1,1,1,1
+access_aa_ats_report_recruiter,aa.ats.report.recruiter,model_aa_ats_report,hr_recruitment.group_hr_recruitment_user,1,1,1,1
+access_aa_ats_report_interviewer,aa.ats.report.interviewer,model_aa_ats_report,hr_recruitment.group_hr_recruitment_interviewer,1,0,0,0

@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Entry card on the standard /my portal home -->
+    <template id="portal_my_home_job_dashboard" name="Candidate Dashboard Card" inherit_id="portal.portal_my_home" priority="40">
+        <xpath expr="//div[@id='portal_common_category']" position="inside">
+            <t t-call="portal.portal_docs_entry">
+                <t t-set="icon" t-value="'/aa_job_portal/static/src/img/job_portal.svg'"/>
+                <t t-set="title">Candidate Dashboard</t>
+                <t t-set="text">Browse jobs, track applications and interviews</t>
+                <t t-set="url" t-value="'/my/jobs'"/>
+                <t t-set="config_card" t-value="True"/>
+            </t>
+        </xpath>
+    </template>
+</odoo>

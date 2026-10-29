@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="1">
+        <!-- Job seekers land on their dashboard when they open /my -->
+        <function model="ir.config_parameter" name="set_param" eval="('aa_job_portal.redirect_home', 'True')"/>
+        <!-- Visitors can create a portal account to apply (Settings > Customer Account: Free sign up) -->
+        <function model="ir.config_parameter" name="set_param" eval="('auth_signup.invitation_scope', 'b2c')"/>
+
+        <record id="menu_candidate_dashboard" model="website.menu">
+            <field name="name">Candidate Dashboard</field>
+            <field name="url">/my/jobs</field>
+            <field name="parent_id" ref="website.main_menu"/>
+            <field name="sequence">70</field>
+        </record>
+    </data>
+</odoo>
