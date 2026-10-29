@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo noupdate="1">
+    <!-- Entry card on the standard /my portal home -->
+    <record id="portal_entry_candidate_dashboard" model="portal.entry">
+        <field name="name">Candidate Dashboard</field>
+        <field name="description">Browse jobs, track applications and interviews</field>
+        <field name="url">/my/jobs</field>
+        <field name="image" type="bytes" file="aa_job_portal/static/src/img/job_portal.svg"/>
+        <field name="category">common_category</field>
+        <field name="is_config_card" eval="True"/>
+        <field name="sequence" eval="5"/>
+    </record>
+</odoo>

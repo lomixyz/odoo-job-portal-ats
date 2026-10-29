@@ -1,0 +1,169 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- ATS reports -->
+    <record id="aa_ats_report_view_list" model="ir.ui.view">
+        <field name="name">aa.ats.report.list</field>
+        <field name="model">aa.ats.report</field>
+        <field name="arch" type="xml">
+            <list create="0">
+                <field name="create_date" string="Checked On"/>
+                <field name="name"/>
+                <field name="partner_id"/>
+                <field name="applicant_id" optional="show"/>
+                <field name="job_id" optional="show"/>
+                <field name="score" widget="progressbar"/>
+                <field name="grade" widget="badge" decoration-success="grade == 'excellent'" decoration-info="grade == 'good'"
+                       decoration-warning="grade == 'fair'" decoration-danger="grade == 'poor'"/>
+                <field name="keyword_score" string="Job Match %" optional="show"/>
+                <field name="failed_count" optional="hide"/>
+                <field name="warning_count" optional="hide"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="aa_ats_report_view_form" model="ir.ui.view">
+        <field name="name">aa.ats.report.form</field>
+        <field name="model">aa.ats.report</field>
+        <field name="arch" type="xml">
+            <form create="0" edit="0">
+                <header>
+                    <button name="action_open_cv" type="object" string="Download CV" class="btn-secondary" invisible="not attachment_id"/>
+                </header>
+                <sheet>
+                    <div class="oe_title">
+                        <label for="name"/>
+                        <h1><field name="name"/></h1>
+                    </div>
+                    <group>
+                        <group>
+                            <field name="score" widget="progressbar"/>
+                            <field name="grade" widget="badge" decoration-success="grade == 'excellent'" decoration-info="grade == 'good'"
+                                   decoration-warning="grade == 'fair'" decoration-danger="grade == 'poor'"/>
+                            <field name="has_keywords" invisible="1"/>
+                            <field name="keyword_score" widget="progressbar" invisible="not has_keywords"/>
+                            <field name="attachment_id" invisible="1"/>
+                        </group>
+                        <group>
+                            <field name="partner_id"/>
+                            <field name="applicant_id"/>
+                            <field name="job_id"/>
+                            <field name="file_format"/>
+                            <field name="word_count"/>
+                            <field name="page_count"/>
+                        </group>
+                    </group>
+                    <notebook>
+                        <page string="Checks" name="checks">
+                            <field name="report_html" nolabel="1"/>
+                        </page>
+                        <page string="Text read by the ATS" name="text">
+                            <field name="cv_text" nolabel="1"/>
+                        </page>
+                    </notebook>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="aa_ats_report_view_search" model="ir.ui.view">
+        <field name="name">aa.ats.report.search</field>
+        <field name="model">aa.ats.report</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="partner_id"/>
+                <field name="job_id"/>
+                <filter string="ATS-ready (85+)" name="excellent" domain="[('grade', '=', 'excellent')]"/>
+                <filter string="Needs work (&lt; 70)" name="needs_work" domain="[('score', '&lt;', 70)]"/>
+                <separator/>
+                <filter string="Grade" name="group_grade" context="{'group_by': 'grade'}"/>
+                <filter string="Job Position" name="group_job" context="{'group_by': 'job_id'}"/>
+            </search>
+        </field>
+    </record>
+
+    <record id="aa_ats_report_action" model="ir.actions.act_window">
+        <field name="name">CV ATS Reports</field>
+        <field name="res_model">aa.ats.report</field>
+        <field name="view_mode">list,form</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">No CV checked yet</p>
+            <p>Every CV attached to an applicant or uploaded in the candidate portal is checked against ATS-compliance rules.</p>
+        </field>
+    </record>
+
+    <menuitem id="menu_aa_ats_report" name="CV ATS Reports" action="aa_ats_report_action"
+              parent="menu_aa_job_portal_root" sequence="30"/>
+
+    <!-- Applicant: ATS tab, list columns, filters -->
+    <record id="hr_applicant_view_form_aa_ats" model="ir.ui.view">
+        <field name="name">hr.applicant.form.aa_ats</field>
+        <field name="model">hr.applicant</field>
+        <field name="inherit_id" ref="hr_recruitment.hr_applicant_view_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//notebook" position="inside">
+                <page string="ATS Check" name="aa_ats_check">
+                    <group>
+                        <group>
+                            <field name="aa_ats_report_id" invisible="1"/>
+                            <field name="aa_ats_score" widget="progressbar" invisible="not aa_ats_report_id"/>
+                            <field name="aa_ats_grade" widget="badge" invisible="not aa_ats_report_id"
+                                   decoration-success="aa_ats_grade == 'excellent'" decoration-info="aa_ats_grade == 'good'"
+                                   decoration-warning="aa_ats_grade == 'fair'" decoration-danger="aa_ats_grade == 'poor'"/>
+                            <field name="aa_ats_keyword_score" widget="progressbar" invisible="not aa_ats_report_id"/>
+                        </group>
+                        <group>
+                            <div class="d-flex gap-2" colspan="2">
+                                <button name="action_aa_run_ats" type="object" string="Run ATS Check" class="btn-primary"/>
+                                <button name="action_aa_open_ats_cv" type="object" string="Download CV" class="btn-secondary"
+                                        invisible="not aa_ats_report_id"/>
+                            </div>
+                        </group>
+                    </group>
+                    <div invisible="aa_ats_report_id" class="text-muted">
+                        No CV has been checked yet. Attach the applicant's CV (PDF, DOCX, ODT, RTF or TXT) and click "Run ATS Check".
+                    </div>
+                    <field name="aa_ats_report_html" nolabel="1" invisible="not aa_ats_report_id"/>
+                </page>
+            </xpath>
+        </field>
+    </record>
+
+    <record id="hr_applicant_view_list_aa_ats" model="ir.ui.view">
+        <field name="name">hr.applicant.list.aa_ats</field>
+        <field name="model">hr.applicant</field>
+        <field name="inherit_id" ref="hr_recruitment.crm_case_tree_view_job"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='job_id']" position="after">
+                <field name="aa_ats_score" string="ATS" widget="progressbar" optional="show"/>
+                <field name="aa_ats_keyword_score" string="Job Match %" optional="hide"/>
+            </xpath>
+        </field>
+    </record>
+
+    <record id="hr_applicant_view_search_aa_ats" model="ir.ui.view">
+        <field name="name">hr.applicant.search.aa_ats</field>
+        <field name="model">hr.applicant</field>
+        <field name="inherit_id" ref="hr_recruitment.hr_applicant_view_search_bis"/>
+        <field name="arch" type="xml">
+            <xpath expr="//search" position="inside">
+                <separator/>
+                <filter string="ATS-ready CV (85+)" name="aa_ats_ready" domain="[('aa_ats_grade', '=', 'excellent')]"/>
+                <filter string="CV needs work (&lt; 70)" name="aa_ats_low" domain="[('aa_ats_report_id', '!=', False), ('aa_ats_score', '&lt;', 70)]"/>
+                <filter string="Strong job match (70%+)" name="aa_ats_match" domain="[('aa_ats_keyword_score', '&gt;=', 70)]"/>
+            </xpath>
+        </field>
+    </record>
+
+    <!-- Contact: CV score on the candidate tab -->
+    <record id="view_partner_form_aa_ats" model="ir.ui.view">
+        <field name="name">res.partner.form.aa_ats</field>
+        <field name="model">res.partner</field>
+        <field name="inherit_id" ref="aa_job_portal.view_partner_form_aa_job_portal"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='aa_cv_attachment_id']" position="after">
+                <field name="aa_ats_report_id"/>
+                <field name="aa_ats_score" widget="progressbar" invisible="not aa_ats_report_id"/>
+            </xpath>
+        </field>
+    </record>
+</odoo>

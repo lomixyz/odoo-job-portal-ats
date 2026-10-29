@@ -1,0 +1,206 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+
+    <t t-name="aa_job_portal.RecruitmentDashboard">
+        <div class="o_aa_rdash h-100 overflow-auto">
+            <div t-if="!this.state.data" class="o_aa_rdash_loading">
+                <span class="spinner-border" role="status"/>
+            </div>
+            <div t-else="" class="o_aa_rdash_wrap">
+                <t t-set="d" t-value="this.state.data"/>
+
+                <!-- Header -->
+                <div class="o_aa_rdash_head">
+                    <div>
+                        <h1>Recruitment Dashboard</h1>
+                        <p>Job positions, pipeline and interviews at a glance</p>
+                    </div>
+                    <div class="o_aa_rdash_head_actions">
+                        <button class="btn btn-secondary" t-on-click="() => this.open('jobs')"><svg class="o_aa_svg me-1" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg> Job Positions</button>
+                        <button class="btn btn-secondary" t-on-click="() => this.open('all_applicants')"><svg class="o_aa_svg me-1" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg> Applications</button>
+                        <button class="btn btn-primary" t-on-click="() => this.open('job_new')"><svg class="o_aa_svg me-1" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg> New Job</button>
+                    </div>
+                </div>
+
+                <!-- KPIs -->
+                <div class="o_aa_rdash_kpis">
+                    <button class="o_aa_kpi" t-on-click="() => this.open('jobs')">
+                        <span class="o_aa_kpi_ico o_aa_tone_blue"><svg class="o_aa_svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg></span>
+                        <span class="o_aa_kpi_body">
+                            <span class="o_aa_kpi_label">Published jobs</span>
+                            <span class="o_aa_kpi_value" t-out="d.kpis.published"/>
+                        </span>
+                    </button>
+                    <button class="o_aa_kpi" t-on-click="() => this.open('in_progress')">
+                        <span class="o_aa_kpi_ico o_aa_tone_cyan"><svg class="o_aa_svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></span>
+                        <span class="o_aa_kpi_body">
+                            <span class="o_aa_kpi_label">In progress</span>
+                            <span class="o_aa_kpi_value" t-out="d.kpis.in_progress"/>
+                        </span>
+                    </button>
+                    <button class="o_aa_kpi" t-on-click="() => this.open('new_week')">
+                        <span class="o_aa_kpi_ico o_aa_tone_orange"><svg class="o_aa_svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3l1.9 5.1L19 10l-5.1 1.9L12 17l-1.9-5.1L5 10l5.1-1.9z"/></svg></span>
+                        <span class="o_aa_kpi_body">
+                            <span class="o_aa_kpi_label">New this week</span>
+                            <span class="o_aa_kpi_value" t-out="d.kpis.new_week"/>
+                        </span>
+                    </button>
+                    <button class="o_aa_kpi" t-on-click="() => this.open('interviews')">
+                        <span class="o_aa_kpi_ico o_aa_tone_purple"><svg class="o_aa_svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg></span>
+                        <span class="o_aa_kpi_body">
+                            <span class="o_aa_kpi_label">Upcoming interviews</span>
+                            <span class="o_aa_kpi_value" t-out="d.kpis.interviews"/>
+                        </span>
+                    </button>
+                    <button class="o_aa_kpi" t-on-click="() => this.open('hired_month')">
+                        <span class="o_aa_kpi_ico o_aa_tone_green"><svg class="o_aa_svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="8" r="7"/><polyline points="8.21 13.89 7 23 12 20 17 23 15.79 13.88"/></svg></span>
+                        <span class="o_aa_kpi_body">
+                            <span class="o_aa_kpi_label">Hired this month</span>
+                            <span class="o_aa_kpi_value" t-out="d.kpis.hired_month"/>
+                        </span>
+                    </button>
+                </div>
+
+                <!-- Job positions -->
+                <section class="o_aa_card">
+                    <div class="o_aa_card_head">
+                        <div>
+                            <h2>Job positions</h2>
+                            <p>Click a position to open its applicant pipeline</p>
+                        </div>
+                        <div class="o_aa_card_tools">
+                            <div class="btn-group btn-group-sm" role="group">
+                                <button t-attf-class="btn #{this.state.filter === 'all' ? 'btn-primary' : 'btn-secondary'}" t-on-click="() => this.setFilter('all')">All</button>
+                                <button t-attf-class="btn #{this.state.filter === 'published' ? 'btn-primary' : 'btn-secondary'}" t-on-click="() => this.setFilter('published')">Published</button>
+                                <button t-attf-class="btn #{this.state.filter === 'unpublished' ? 'btn-primary' : 'btn-secondary'}" t-on-click="() => this.setFilter('unpublished')">Not published</button>
+                            </div>
+                            <input type="search" class="form-control form-control-sm o_aa_search" placeholder="Search positions…"
+                                   t-att-value="this.state.search" t-on-input="(ev) => this.onSearch(ev)"/>
+                        </div>
+                    </div>
+                    <div class="table-responsive">
+                        <table class="table o_aa_table mb-0">
+                            <thead>
+                                <tr>
+                                    <th>Position</th>
+                                    <th class="d-none d-lg-table-cell">Recruiter</th>
+                                    <th class="text-center">Website</th>
+                                    <th class="text-center">In progress</th>
+                                    <th class="text-center">New (7d)</th>
+                                    <th class="text-center">Hired / Target</th>
+                                    <th/>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr t-if="!this.visibleJobs().length">
+                                    <td colspan="7" class="text-center text-muted py-4">No job positions match.</td>
+                                </tr>
+                                <tr t-foreach="this.visibleJobs()" t-as="job" t-key="job.id" class="o_aa_row" t-on-click="() => this.open('job_pipeline', job.id)">
+                                    <td>
+                                        <div class="o_aa_row_title"><t t-out="job.name"/><span t-if="job.filled" class="o_aa_filled">Position filled</span></div>
+                                        <div class="o_aa_muted small">
+                                            <t t-out="job.department or job.company"/>
+                                            <t t-if="job.type"> · <t t-out="job.type"/></t>
+                                        </div>
+                                    </td>
+                                    <td class="d-none d-lg-table-cell o_aa_muted" t-out="job.recruiter or '—'"/>
+                                    <td class="text-center" t-on-click.stop="() => this.togglePublish(job)">
+                                        <div class="form-check form-switch d-inline-block m-0" t-att-title="job.published ? 'Unpublish from website' : 'Publish on website'">
+                                            <input class="form-check-input" type="checkbox" role="switch" t-att-checked="job.published"/>
+                                        </div>
+                                    </td>
+                                    <td class="text-center fw-bold" t-out="job.in_progress"/>
+                                    <td class="text-center">
+                                        <span t-if="job.new" class="o_aa_badge_new" t-out="job.new"/>
+                                        <span t-else="" class="o_aa_muted">0</span>
+                                    </td>
+                                    <td class="text-center">
+                                        <t t-if="job.target">
+                                            <span t-attf-class="#{job.hired &gt; job.target ? 'o_aa_over' : ''}"><t t-out="job.hired"/> / <t t-out="job.target"/></span>
+                                            <div t-attf-class="o_aa_progress #{job.hired &gt; job.target ? 'is-over' : (job.filled ? 'is-full' : '')}"><div t-attf-style="width: #{this.hiredPct(job)}%"/></div>
+                                            <div t-if="job.hired &gt; job.target" class="o_aa_over small">+<t t-out="job.hired - job.target"/> over target</div>
+                                        </t>
+                                        <span t-else="" class="o_aa_muted" title="No target set"><t t-out="job.hired"/> / —</span>
+                                    </td>
+                                    <td class="text-end text-nowrap">
+                                        <button class="btn btn-link btn-sm" t-on-click.stop="() => this.open('job_form', job.id)" title="Edit position"><svg class="o_aa_svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4z"/></svg></button>
+                                        <button class="btn btn-link btn-sm" t-on-click.stop="() => this.open('job_pipeline', job.id)">Pipeline <svg class="o_aa_svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="9 18 15 12 9 6"/></svg></button>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </section>
+
+                <div class="o_aa_grid3">
+                    <!-- Funnel -->
+                    <section class="o_aa_card">
+                        <div class="o_aa_card_head">
+                            <div>
+                                <h2>Pipeline by stage</h2>
+                                <p>Applications in progress, all positions</p>
+                            </div>
+                        </div>
+                        <div t-if="!d.funnel.length" class="o_aa_muted">No stages configured.</div>
+                        <button t-foreach="d.funnel" t-as="st" t-key="st.id" class="o_aa_funnel_row" t-on-click="() => this.open('stage', st.id)">
+                            <span class="o_aa_funnel_name">
+                                <t t-out="st.name"/>
+                                <span t-if="st.shortlist" class="o_aa_star ms-1" title="Shortlisted for candidates">★</span>
+                            </span>
+                            <span class="o_aa_funnel_bar"><span t-attf-style="width: #{Math.max(st.pct, st.count ? 4 : 0)}%"/></span>
+                            <span class="o_aa_funnel_count" t-out="st.count"/>
+                        </button>
+                        <div class="o_aa_portal_share">
+                            <svg class="o_aa_svg me-1" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+                            <button class="btn btn-link p-0 align-baseline" t-on-click="() => this.open('portal')">
+                                <t t-out="d.kpis.portal_month"/> of <t t-out="d.kpis.all_month"/>
+                            </button>
+                            applications in the last 30 days came through the candidate portal.
+                        </div>
+                    </section>
+
+                    <!-- Latest applications -->
+                    <section class="o_aa_card">
+                        <div class="o_aa_card_head">
+                            <div>
+                                <h2>Latest applications</h2>
+                                <p>Most recent candidates</p>
+                            </div>
+                            <button class="btn btn-link btn-sm" t-on-click="() => this.open('all_applicants')">View all</button>
+                        </div>
+                        <div t-if="!d.recent.length" class="o_aa_muted">No applications yet.</div>
+                        <button t-foreach="d.recent" t-as="app" t-key="app.id" class="o_aa_list_row" t-on-click="() => this.open('applicant', app.id)">
+                            <span class="o_aa_initial" t-out="app.initial"/>
+                            <span class="o_aa_list_main">
+                                <span class="o_aa_row_title text-truncate"><t t-out="app.name"/><span t-if="app.portal" class="o_aa_chip">Portal</span></span>
+                                <span class="o_aa_muted small text-truncate"><t t-out="app.job"/> · <t t-out="app.date"/></span>
+                            </span>
+                            <span t-if="app.ats !== false" t-attf-class="o_aa_ats o_aa_ats_#{app.ats_tone}" title="CV ATS score">ATS <t t-out="app.ats"/></span>
+                            <span t-attf-class="o_aa_status o_aa_status_#{app.tone}" t-out="app.status"/>
+                        </button>
+                    </section>
+
+                    <!-- Interviews -->
+                    <section class="o_aa_card">
+                        <div class="o_aa_card_head">
+                            <div>
+                                <h2>Upcoming interviews</h2>
+                                <p>Meetings linked to applicants</p>
+                            </div>
+                            <button class="btn btn-link btn-sm" t-on-click="() => this.open('interviews')">View all</button>
+                        </div>
+                        <div t-if="!d.interviews.length" class="o_aa_muted">No interviews scheduled.</div>
+                        <button t-foreach="d.interviews" t-as="ev" t-key="ev.id" class="o_aa_list_row" t-on-click="() => this.open('event', ev.id)">
+                            <span class="o_aa_date"><span t-out="ev.month"/><strong t-out="ev.day"/></span>
+                            <span class="o_aa_list_main">
+                                <span class="o_aa_row_title text-truncate" t-out="ev.name"/>
+                                <span class="o_aa_muted small text-truncate"><t t-out="ev.job"/> · <t t-out="ev.time"/><t t-if="ev.location"> · <t t-out="ev.location"/></t></span>
+                            </span>
+                        </button>
+                    </section>
+                </div>
+            </div>
+        </div>
+    </t>
+
+</templates>

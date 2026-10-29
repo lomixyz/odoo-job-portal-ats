@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="action_aa_recruitment_dashboard" model="ir.actions.client">
+        <field name="name">Recruitment Dashboard</field>
+        <field name="tag">aa_recruitment_dashboard</field>
+    </record>
+
+    <!-- First item of the Recruitment app: it opens when a recruiter clicks the app -->
+    <menuitem id="menu_aa_recruitment_dashboard" name="Dashboard"
+              parent="hr_recruitment.menu_hr_recruitment_root"
+              action="action_aa_recruitment_dashboard" sequence="0"
+              groups="hr_recruitment.group_hr_recruitment_user"/>
+</odoo>

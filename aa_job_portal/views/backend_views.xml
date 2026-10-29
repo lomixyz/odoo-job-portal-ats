@@ -1,0 +1,188 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Stage: candidate-facing options -->
+    <record id="hr_recruitment_stage_form_aa_job_portal" model="ir.ui.view">
+        <field name="name">hr.recruitment.stage.form.aa_job_portal</field>
+        <field name="model">hr.recruitment.stage</field>
+        <field name="inherit_id" ref="hr_recruitment.hr_recruitment_stage_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//sheet" position="inside">
+                <group string="Candidate Portal" name="aa_job_portal">
+                    <group>
+                        <field name="aa_portal_shortlist"/>
+                        <field name="aa_portal_label" placeholder="Leave empty to show the stage name"/>
+                    </group>
+                </group>
+            </xpath>
+        </field>
+    </record>
+
+    <!-- Applicant: portal origin -->
+    <record id="hr_applicant_view_form_aa_job_portal" model="ir.ui.view">
+        <field name="name">hr.applicant.form.aa_job_portal</field>
+        <field name="model">hr.applicant</field>
+        <field name="inherit_id" ref="hr_recruitment.hr_applicant_view_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="(//field[@name='medium_id'])[1]" position="after">
+                <field name="aa_portal_applied"/>
+            </xpath>
+        </field>
+    </record>
+
+    <record id="hr_applicant_view_search_aa_job_portal" model="ir.ui.view">
+        <field name="name">hr.applicant.search.aa_job_portal</field>
+        <field name="model">hr.applicant</field>
+        <field name="inherit_id" ref="hr_recruitment.hr_applicant_view_search_bis"/>
+        <field name="arch" type="xml">
+            <xpath expr="//search" position="inside">
+                <separator/>
+                <filter string="Applied via Candidate Portal" name="aa_portal_applied" domain="[('aa_portal_applied', '=', True)]"/>
+            </xpath>
+        </field>
+    </record>
+
+    <!-- Contact: candidate profile tab -->
+    <record id="view_partner_form_aa_job_portal" model="ir.ui.view">
+        <field name="name">res.partner.form.aa_job_portal</field>
+        <field name="model">res.partner</field>
+        <field name="inherit_id" ref="base.view_partner_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//notebook" position="before">
+                <field name="aa_job_seeker" invisible="1"/>
+            </xpath>
+            <xpath expr="//notebook" position="inside">
+                <page string="Candidate Profile" name="aa_candidate_profile" invisible="not aa_job_seeker"
+                      groups="hr_recruitment.group_hr_recruitment_user">
+                    <group>
+                        <group>
+                            <field name="aa_job_seeker"/>
+                            <field name="aa_profile_verified"/>
+                            <field name="aa_headline"/>
+                            <field name="aa_experience_years"/>
+                        </group>
+                        <group>
+                            <field name="aa_skills"/>
+                            <field name="aa_preferred_location"/>
+                            <field name="aa_linkedin_url" widget="url"/>
+                            <field name="aa_cv_attachment_id"/>
+                        </group>
+                    </group>
+                    <field name="aa_saved_job_ids" readonly="1">
+                        <list>
+                            <field name="job_id"/>
+                            <field name="company_id" groups="base.group_multi_company"/>
+                            <field name="create_date" string="Saved On"/>
+                        </list>
+                    </field>
+                </page>
+            </xpath>
+        </field>
+    </record>
+
+    <!-- Saved jobs -->
+    <record id="aa_job_saved_view_list" model="ir.ui.view">
+        <field name="name">aa.job.saved.list</field>
+        <field name="model">aa.job.saved</field>
+        <field name="arch" type="xml">
+            <list create="0">
+                <field name="partner_id"/>
+                <field name="job_id"/>
+                <field name="company_id" groups="base.group_multi_company"/>
+                <field name="create_date" string="Saved On"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="aa_job_saved_view_search" model="ir.ui.view">
+        <field name="name">aa.job.saved.search</field>
+        <field name="model">aa.job.saved</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="partner_id"/>
+                <field name="job_id"/>
+                <separator/>
+                    <filter string="Job Position" name="group_job" context="{'group_by': 'job_id'}"/>
+            </search>
+        </field>
+    </record>
+
+    <record id="aa_job_saved_action" model="ir.actions.act_window">
+        <field name="name">Saved Jobs</field>
+        <field name="res_model">aa.job.saved</field>
+        <field name="view_mode">list</field>
+        <field name="context">{'search_default_group_job': 1}</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">No saved jobs yet</p>
+            <p>Candidates bookmark job positions from their portal dashboard.</p>
+        </field>
+    </record>
+
+    <!-- Notifications -->
+    <record id="aa_job_notification_view_list" model="ir.ui.view">
+        <field name="name">aa.job.notification.list</field>
+        <field name="model">aa.job.notification</field>
+        <field name="arch" type="xml">
+            <list create="0" decoration-bf="not is_read">
+                <field name="create_date" string="Date"/>
+                <field name="partner_id"/>
+                <field name="notif_type"/>
+                <field name="title"/>
+                <field name="applicant_id" optional="show"/>
+                <field name="is_read"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="aa_job_notification_view_form" model="ir.ui.view">
+        <field name="name">aa.job.notification.form</field>
+        <field name="model">aa.job.notification</field>
+        <field name="arch" type="xml">
+            <form>
+                <sheet>
+                    <group>
+                        <group>
+                            <field name="partner_id"/>
+                            <field name="notif_type"/>
+                            <field name="title"/>
+                            <field name="is_read"/>
+                        </group>
+                        <group>
+                            <field name="applicant_id"/>
+                            <field name="job_id"/>
+                            <field name="event_id"/>
+                            <field name="url"/>
+                        </group>
+                    </group>
+                    <field name="body" placeholder="Message shown to the candidate"/>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="aa_job_notification_view_search" model="ir.ui.view">
+        <field name="name">aa.job.notification.search</field>
+        <field name="model">aa.job.notification</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="partner_id"/>
+                <field name="title"/>
+                <filter string="Unread" name="unread" domain="[('is_read', '=', False)]"/>
+                <separator/>
+                    <filter string="Type" name="group_type" context="{'group_by': 'notif_type'}"/>
+            </search>
+        </field>
+    </record>
+
+    <record id="aa_job_notification_action" model="ir.actions.act_window">
+        <field name="name">Candidate Notifications</field>
+        <field name="res_model">aa.job.notification</field>
+        <field name="view_mode">list,form</field>
+    </record>
+
+    <menuitem id="menu_aa_job_portal_root" name="Candidate Portal"
+              parent="hr_recruitment.menu_hr_recruitment_configuration" sequence="90"/>
+    <menuitem id="menu_aa_job_saved" name="Saved Jobs" action="aa_job_saved_action"
+              parent="menu_aa_job_portal_root" sequence="10"/>
+    <menuitem id="menu_aa_job_notification" name="Candidate Notifications" action="aa_job_notification_action"
+              parent="menu_aa_job_portal_root" sequence="20"/>
+</odoo>

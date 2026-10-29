@@ -1,0 +1,464 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- ============================== DASHBOARD ============================== -->
+    <template id="page_dashboard" name="Candidate Dashboard">
+        <t t-call="aa_job_portal.layout">
+            <t t-call="aa_job_portal.page_header" head_icon="'grid'" head_title.translate="Dashboard" head_sub.translate="Your job search and applications"/>
+
+            <div t-if="show_verify_banner" class="aajp-banner">
+                <span class="aajp-banner-ico"><t t-out="icon('user', 24)"/></span>
+                <div class="aajp-banner-text">
+                    <div class="aajp-banner-title">Verify Your Profile</div>
+                    <div>Complete your candidate profile and upload your CV so companies can review your details accurately.</div>
+                </div>
+                <a href="/my/jobs/profile" class="aajp-btn aajp-btn-cyan">Review Profile</a>
+                <form action="/my/jobs/banner/dismiss" method="post" class="m-0">
+                    <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
+                    <button type="submit" class="aajp-banner-close" title="Dismiss"><t t-out="icon('x', 20)"/></button>
+                </form>
+            </div>
+
+            <div class="aajp-stats">
+                <div class="aajp-card aajp-stat">
+                    <span class="aajp-tile aajp-tile-blue"><t t-out="icon('check', 22)"/></span>
+                    <div>
+                        <div class="aajp-stat-label">Applied jobs</div>
+                        <div class="aajp-stat-value" t-out="stat_applied"/>
+                        <a href="/my/jobs/applied" class="aajp-link">View all applications <t t-out="icon('arrow-right', 15)"/></a>
+                    </div>
+                </div>
+                <div class="aajp-card aajp-stat">
+                    <span class="aajp-tile aajp-tile-cyan"><t t-out="icon('bookmark', 22)"/></span>
+                    <div>
+                        <div class="aajp-stat-label">Saved Jobs</div>
+                        <div class="aajp-stat-value" t-out="stat_saved"/>
+                        <a href="/my/jobs/saved" class="aajp-link">View saved jobs <t t-out="icon('arrow-right', 15)"/></a>
+                    </div>
+                </div>
+                <div class="aajp-card aajp-stat">
+                    <span class="aajp-tile aajp-tile-green"><t t-out="icon('user-check', 22)"/></span>
+                    <div>
+                        <div class="aajp-stat-label">Shortlist</div>
+                        <div class="aajp-stat-value" t-out="stat_shortlist"/>
+                        <a href="/my/jobs/applied?status=shortlist" class="aajp-link">Companies interested in you <t t-out="icon('arrow-right', 15)"/></a>
+                    </div>
+                </div>
+                <div class="aajp-card aajp-stat">
+                    <span class="aajp-tile aajp-tile-orange"><t t-out="icon('bell', 22)"/></span>
+                    <div>
+                        <div class="aajp-stat-label">Notifications</div>
+                        <div class="aajp-stat-value" t-out="stat_unread"/>
+                        <a href="/my/jobs/notifications" class="aajp-link">View all <t t-out="icon('arrow-right', 15)"/></a>
+                    </div>
+                </div>
+            </div>
+
+            <div t-if="upcoming_interviews or applicants" class="aajp-two-col">
+                <section class="aajp-card aajp-section">
+                    <div class="aajp-section-head">
+                        <span class="aajp-tile aajp-tile-soft"><t t-out="icon('check-square', 20)"/></span>
+                        <div class="flex-grow-1">
+                            <h2>Recent applications</h2>
+                            <p>Latest status of your applications</p>
+                        </div>
+                        <a href="/my/jobs/applied" class="aajp-link">View all</a>
+                    </div>
+                    <div t-if="not applicants" class="aajp-muted py-3">No applications yet.</div>
+                    <ul class="aajp-list">
+                        <li t-foreach="applicants" t-as="app" class="aajp-list-row">
+                            <t t-call="aa_job_portal.company_logo" company="app.company_id or app.job_id.company_id"/>
+                            <div class="flex-grow-1 min-w-0">
+                                <div class="aajp-row-title text-truncate" t-out="app.job_id.name or app.partner_name"/>
+                                <div class="aajp-muted small">Applied <t t-out="fmt_d(app.create_date)"/></div>
+                            </div>
+                            <t t-call="aa_job_portal.status_badge" applicant="app"/>
+                        </li>
+                    </ul>
+                </section>
+                <section class="aajp-card aajp-section">
+                    <div class="aajp-section-head">
+                        <span class="aajp-tile aajp-tile-soft"><t t-out="icon('video', 20)"/></span>
+                        <div class="flex-grow-1">
+                            <h2>Upcoming interviews</h2>
+                            <p>Meetings scheduled by recruiters</p>
+                        </div>
+                        <a href="/my/jobs/interviews" class="aajp-link">View all</a>
+                    </div>
+                    <div t-if="not upcoming_interviews" class="aajp-muted py-3">No interviews scheduled yet.</div>
+                    <ul class="aajp-list">
+                        <li t-foreach="upcoming_interviews" t-as="ev" class="aajp-list-row">
+                            <span class="aajp-date-chip">
+                                <span class="aajp-date-chip-m" t-out="fmt_d(ev.start, 'MMM')"/>
+                                <span class="aajp-date-chip-d" t-out="fmt_d(ev.start, 'd')"/>
+                            </span>
+                            <div class="flex-grow-1 min-w-0">
+                                <div class="aajp-row-title text-truncate" t-out="ev.applicant_id.job_id.name or ev.name"/>
+                                <div class="aajp-muted small"><t t-out="icon('clock', 14)"/> <t t-out="fmt_dt(ev.start, 'EEE · HH:mm') if not ev.allday else 'All day'"/></div>
+                            </div>
+                        </li>
+                    </ul>
+                </section>
+            </div>
+
+            <section class="aajp-card aajp-section">
+                <div class="aajp-section-head">
+                    <span class="aajp-tile aajp-tile-soft"><t t-out="icon('sparkles', 20)"/></span>
+                    <div class="flex-grow-1">
+                        <h2>Recommended for you</h2>
+                        <p>Jobs matching your profile and preferences</p>
+                    </div>
+                    <a href="/my/jobs/browse" class="aajp-link">View all</a>
+                </div>
+                <div t-if="recommended" class="aajp-job-grid">
+                    <t t-foreach="recommended" t-as="job">
+                        <t t-call="aa_job_portal.job_card"/>
+                    </t>
+                </div>
+                <t t-else="">
+                    <t t-call="aa_job_portal.empty_state" empty_icon="'briefcase'" empty_title.translate="No open positions right now" empty_text.translate="New jobs published by the company will appear here."/>
+                </t>
+            </section>
+        </t>
+    </template>
+
+    <!-- ============================== BROWSE ============================== -->
+    <template id="page_browse" name="Candidate Portal Browse Jobs">
+        <t t-call="aa_job_portal.layout">
+            <t t-call="aa_job_portal.page_header" head_icon="'search'" head_title.translate="Browse Jobs"
+               head_sub.f="#{total} open position#{'' if total == 1 else 's'}"/>
+            <form action="/my/jobs/browse" method="get" class="aajp-card aajp-searchbar">
+                <t t-out="icon('search', 20)"/>
+                <input type="search" name="search" t-att-value="search" class="aajp-search-input"
+                       placeholder="Search by job title, department, city or country"/>
+                <button type="submit" class="aajp-btn aajp-btn-primary">Search</button>
+            </form>
+            <div t-if="jobs" class="aajp-job-grid">
+                <t t-foreach="jobs" t-as="job"><t t-call="aa_job_portal.job_card"/></t>
+            </div>
+            <t t-else="">
+                <div class="aajp-card">
+                    <t t-call="aa_job_portal.empty_state" empty_icon="'search'" empty_title.translate="No jobs found" empty_text.translate="Try another keyword or clear the search.">
+                        <a t-if="search" href="/my/jobs/browse" class="aajp-btn aajp-btn-light">Clear search</a>
+                    </t>
+                </div>
+            </t>
+            <div t-if="pager['page_count'] &gt; 1" class="aajp-pager">
+                <t t-call="portal.pager"/>
+            </div>
+        </t>
+    </template>
+
+    <!-- ============================== JOB DETAIL ============================== -->
+    <template id="page_job" name="Candidate Portal Job Detail">
+        <t t-call="aa_job_portal.layout">
+            <a href="/my/jobs/browse" class="aajp-back"><t t-out="icon('arrow-left', 16)"/> All jobs</a>
+            <t t-set="is_saved" t-value="job.id in aajp_saved_job_ids"/>
+            <div t-attf-class="aajp-card aajp-job-hero #{'is-filled' if is_filled else ''}">
+                <div t-if="is_filled" class="aajp-ribbon"><span>Position Filled</span></div>
+                <t t-call="aa_job_portal.company_logo" company="job.company_id"/>
+                <div class="flex-grow-1 min-w-0">
+                    <h1 class="aajp-page-title" t-out="job.name"/>
+                    <div class="aajp-job-meta">
+                        <span><t t-out="icon('building', 16)"/> <t t-out="job.company_id.name"/></span>
+                        <span><t t-out="icon('map-pin', 16)"/> <t t-out="job_location(job)"/></span>
+                        <span t-if="employment_type(job)"><t t-out="icon('briefcase', 16)"/> <t t-out="employment_type(job)"/></span>
+                        <span t-if="job.department_id"><t t-out="icon('grid', 16)"/> <t t-out="job.department_id.name"/></span>
+                    </div>
+                </div>
+                <div class="aajp-hero-actions">
+                    <form t-attf-action="/my/jobs/save/#{job.id}" method="post" class="m-0">
+                        <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
+                        <input type="hidden" name="next" t-attf-value="/my/jobs/job/#{job.id}"/>
+                        <button type="submit" t-attf-class="aajp-btn aajp-btn-light #{'is-saved' if is_saved else ''}">
+                            <t t-out="icon('bookmark', 18)"/> <t t-if="is_saved">Saved</t><t t-else="">Save</t>
+                        </button>
+                    </form>
+                    <a t-if="my_applicant" href="/my/jobs/applied" class="aajp-btn aajp-btn-success"><t t-out="icon('check', 18)"/> Applied</a>
+                    <span t-elif="is_filled" class="aajp-btn aajp-btn-filled" aria-disabled="true">Position filled</span>
+                    <a t-else="" t-attf-href="/my/jobs/apply/#{job.id}" class="aajp-btn aajp-btn-primary">Apply now <t t-out="icon('arrow-right', 18)"/></a>
+                </div>
+            </div>
+            <div class="aajp-card aajp-section aajp-prose">
+                <div t-if="is_filled and not my_applicant" class="aajp-alert aajp-alert-filled mb-3">
+                    This position has been filled and no longer accepts applications. Browse other open jobs or save it in case it reopens.
+                </div>
+                <div t-if="my_applicant" class="aajp-note mb-3">
+                    You applied on <strong t-out="fmt_d(my_applicant.create_date)"/> — current status:
+                    <t t-call="aa_job_portal.status_badge" applicant="my_applicant"/>
+                </div>
+                <t t-if="job.description"><div t-out="job.description"/></t>
+                <p t-else="" class="aajp-muted">The company did not publish a description for this position.</p>
+            </div>
+        </t>
+    </template>
+
+    <!-- ============================== APPLY ============================== -->
+    <template id="page_apply" name="Candidate Portal Apply">
+        <t t-call="aa_job_portal.layout">
+            <a t-attf-href="/my/jobs/job/#{job.id}" class="aajp-back"><t t-out="icon('arrow-left', 16)"/> Back to job</a>
+            <t t-call="aa_job_portal.page_header" head_icon="'briefcase'" head_title="job.name" head_sub="'%s · %s' % (job.company_id.name, job_location(job))"/>
+            <div t-if="error" class="aajp-alert aajp-alert-danger" t-out="error"/>
+            <form t-attf-action="/my/jobs/apply/#{job.id}/submit" method="post" enctype="multipart/form-data" class="aajp-card aajp-section aajp-form">
+                <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
+                <div class="aajp-form-grid">
+                    <label class="aajp-field">
+                        <span>Full name</span>
+                        <input type="text" class="form-control" t-att-value="aajp_partner.name" disabled="disabled"/>
+                    </label>
+                    <label class="aajp-field">
+                        <span>Email</span>
+                        <input type="email" class="form-control" t-att-value="aajp_partner.email" disabled="disabled"/>
+                    </label>
+                    <label class="aajp-field">
+                        <span>Phone</span>
+                        <input type="tel" name="phone" class="form-control" t-att-value="default.get('phone')" placeholder="+966 5x xxx xxxx"/>
+                    </label>
+                    <div class="aajp-field">
+                        <span>Résumé / CV</span>
+                        <div t-if="aajp_partner.aa_cv_attachment_id" class="aajp-cv-current">
+                            <t t-out="icon('file', 18)"/>
+                            <a t-attf-href="/my/jobs/cv/#{aajp_partner.aa_cv_attachment_id.id}" t-out="aajp_partner.aa_cv_attachment_id.name"/>
+                            <span class="aajp-muted small">will be attached — or upload another below</span>
+                        </div>
+                        <input type="file" name="cv_file" class="form-control" accept=".pdf,.doc,.docx,.odt,.rtf,.txt"
+                               t-att-required="None if aajp_partner.aa_cv_attachment_id else 'required'"/>
+                        <label class="aajp-check mt-2">
+                            <input type="checkbox" name="save_cv" value="1" checked="checked"/>
+                            <span>Save the uploaded CV to my profile</span>
+                        </label>
+                    </div>
+                </div>
+                <label class="aajp-field">
+                    <span>Cover letter <em class="aajp-muted">(optional)</em></span>
+                    <textarea name="cover_letter" rows="6" class="form-control"
+                              placeholder="Tell the recruiter why you are a great fit for this role" t-out="default.get('cover_letter')"/>
+                </label>
+                <div class="aajp-form-actions">
+                    <a t-attf-href="/my/jobs/job/#{job.id}" class="aajp-btn aajp-btn-light">Cancel</a>
+                    <button type="submit" class="aajp-btn aajp-btn-primary">Submit application</button>
+                </div>
+            </form>
+        </t>
+    </template>
+
+    <!-- ============================== APPLIED ============================== -->
+    <template id="page_applied" name="Candidate Portal Applied Jobs">
+        <t t-call="aa_job_portal.layout">
+            <t t-call="aa_job_portal.page_header" head_icon="'check-square'" head_title.translate="Applied Jobs" head_sub.translate="Track every application and its current status"/>
+            <div t-if="submitted" class="aajp-alert aajp-alert-success">Your application was submitted. We will notify you when its status changes.</div>
+            <div t-if="already" class="aajp-alert aajp-alert-info">You have already applied to this job.</div>
+            <div class="aajp-tabs">
+                <a href="/my/jobs/applied" t-attf-class="aajp-tab #{'active' if status == 'all' else ''}">All <span t-out="counts['all']"/></a>
+                <a href="/my/jobs/applied?status=active" t-attf-class="aajp-tab #{'active' if status == 'active' else ''}">In progress <span t-out="counts['active']"/></a>
+                <a href="/my/jobs/applied?status=shortlist" t-attf-class="aajp-tab #{'active' if status == 'shortlist' else ''}">Shortlisted <span t-out="counts['shortlist']"/></a>
+                <a href="/my/jobs/applied?status=closed" t-attf-class="aajp-tab #{'active' if status == 'closed' else ''}">Closed <span t-out="counts['closed']"/></a>
+            </div>
+            <div class="aajp-card aajp-table-card">
+                <table t-if="applicants" class="aajp-table">
+                    <thead>
+                        <tr><th>Position</th><th class="d-none d-md-table-cell">Location</th><th>Applied</th><th>Status</th><th/></tr>
+                    </thead>
+                    <tbody>
+                        <tr t-foreach="applicants" t-as="app">
+                            <td>
+                                <div class="d-flex align-items-center gap-3">
+                                    <t t-call="aa_job_portal.company_logo" company="app.company_id or app.job_id.company_id"/>
+                                    <div class="min-w-0">
+                                        <div class="aajp-row-title" t-out="app.job_id.name or app.partner_name"/>
+                                        <div class="aajp-muted small" t-out="(app.company_id or app.job_id.company_id).name"/>
+                                    </div>
+                                </div>
+                            </td>
+                            <td class="d-none d-md-table-cell aajp-muted"><t t-if="app.job_id" t-out="job_location(app.job_id)"/></td>
+                            <td class="aajp-muted text-nowrap" t-out="fmt_d(app.create_date)"/>
+                            <td><t t-call="aa_job_portal.status_badge" applicant="app"/></td>
+                            <td class="text-end">
+                                <a t-if="app.job_id and app.job_id.website_published" t-attf-href="/my/jobs/job/#{app.job_id.id}" class="aajp-link">View <t t-out="icon('arrow-right', 15)"/></a>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+                <t t-else="">
+                    <t t-call="aa_job_portal.empty_state" empty_icon="'check-square'" empty_title.translate="No applications here" empty_text.translate="Browse open positions and apply in one click with your saved CV.">
+                        <a href="/my/jobs/browse" class="aajp-btn aajp-btn-primary">Browse jobs</a>
+                    </t>
+                </t>
+            </div>
+        </t>
+    </template>
+
+    <!-- ============================== SAVED ============================== -->
+    <template id="page_saved" name="Candidate Portal Saved Jobs">
+        <t t-call="aa_job_portal.layout">
+            <t t-call="aa_job_portal.page_header" head_icon="'bookmark'" head_title.translate="Saved Jobs" head_sub.translate="Positions you bookmarked to apply later"/>
+            <div t-if="jobs" class="aajp-job-grid">
+                <t t-foreach="jobs" t-as="job"><t t-call="aa_job_portal.job_card"/></t>
+            </div>
+            <div t-else="" class="aajp-card">
+                <t t-call="aa_job_portal.empty_state" empty_icon="'bookmark'" empty_title.translate="No saved jobs yet" empty_text.translate="Tap the bookmark on any job card to keep it here.">
+                    <a href="/my/jobs/browse" class="aajp-btn aajp-btn-primary">Browse jobs</a>
+                </t>
+            </div>
+        </t>
+    </template>
+
+    <!-- ============================== INTERVIEWS ============================== -->
+    <template id="interview_row" name="Candidate Portal Interview Row">
+        <li class="aajp-interview">
+            <span class="aajp-date-chip">
+                <span class="aajp-date-chip-m" t-out="fmt_d(ev.start, 'MMM')"/>
+                <span class="aajp-date-chip-d" t-out="fmt_d(ev.start, 'd')"/>
+            </span>
+            <div class="flex-grow-1 min-w-0">
+                <div class="aajp-row-title" t-out="ev.applicant_id.job_id.name or ev.name"/>
+                <div class="aajp-muted small" t-out="ev.name"/>
+                <div class="aajp-interview-meta">
+                    <span><t t-out="icon('clock', 15)"/> <t t-if="ev.allday">All day</t><t t-else=""><t t-out="fmt_dt(ev.start)"/> – <t t-out="fmt_dt(ev.stop, 'HH:mm')"/></t></span>
+                    <span t-if="ev.location"><t t-out="icon('map-pin', 15)"/> <t t-out="ev.location"/></span>
+                    <span t-if="ev.user_id"><t t-out="icon('user', 15)"/> <t t-out="ev.user_id.name"/></span>
+                </div>
+            </div>
+            <a t-if="is_upcoming and ev.videocall_location" t-att-href="ev.videocall_location" target="_blank" class="aajp-btn aajp-btn-primary">
+                <t t-out="icon('video', 18)"/> Join
+            </a>
+        </li>
+    </template>
+
+    <template id="page_interviews" name="Candidate Portal Interviews">
+        <t t-call="aa_job_portal.layout">
+            <t t-call="aa_job_portal.page_header" head_icon="'video'" head_title.translate="Interviews" head_sub.translate="Meetings recruiters scheduled for your applications"/>
+            <section class="aajp-card aajp-section">
+                <div class="aajp-section-head"><div class="flex-grow-1"><h2>Upcoming</h2></div></div>
+                <ul t-if="upcoming" class="aajp-list">
+                    <t t-foreach="upcoming" t-as="ev"><t t-set="is_upcoming" t-value="True"/><t t-call="aa_job_portal.interview_row"/></t>
+                </ul>
+                <t t-else="">
+                    <t t-call="aa_job_portal.empty_state" empty_icon="'video'" empty_title.translate="No upcoming interviews" empty_text.translate="When a recruiter schedules a meeting it will appear here and in your notifications."/>
+                </t>
+            </section>
+            <section t-if="past" class="aajp-card aajp-section">
+                <div class="aajp-section-head"><div class="flex-grow-1"><h2>Past</h2></div></div>
+                <ul class="aajp-list">
+                    <t t-foreach="past" t-as="ev"><t t-set="is_upcoming" t-value="False"/><t t-call="aa_job_portal.interview_row"/></t>
+                </ul>
+            </section>
+        </t>
+    </template>
+
+    <!-- ============================== CALENDAR ============================== -->
+    <template id="page_calendar" name="Candidate Portal Calendar">
+        <t t-call="aa_job_portal.layout">
+            <t t-call="aa_job_portal.page_header" head_icon="'calendar'" head_title.translate="Calendar" head_sub.translate="Interviews and application dates at a glance"/>
+            <div class="aajp-card aajp-section">
+                <div class="aajp-cal-head">
+                    <a t-attf-href="/my/jobs/calendar?month=#{prev_month}" class="aajp-icon-btn" title="Previous month"><t t-out="icon('chevron-left', 20)"/></a>
+                    <h2 class="aajp-cal-title" t-out="month_label"/>
+                    <a t-attf-href="/my/jobs/calendar?month=#{next_month}" class="aajp-icon-btn" title="Next month"><t t-out="icon('chevron-right', 20)"/></a>
+                    <a href="/my/jobs/calendar" class="aajp-btn aajp-btn-light ms-auto">Today</a>
+                </div>
+                <div class="aajp-cal-legend">
+                    <span><i class="aajp-cal-dot aajp-cal-dot-interview"/> Interview</span>
+                    <span><i class="aajp-cal-dot aajp-cal-dot-applied"/> Application sent</span>
+                </div>
+                <div class="aajp-cal">
+                    <div t-foreach="weekday_names" t-as="wd" class="aajp-cal-wd" t-out="wd"/>
+                    <t t-foreach="weeks" t-as="week">
+                        <t t-foreach="week" t-as="day">
+                            <div t-attf-class="aajp-cal-day #{'is-out' if day.month != month_first.month else ''} #{'is-today' if day == today else ''}">
+                                <span class="aajp-cal-num" t-out="day.day"/>
+                                <a t-foreach="items.get(day, [])" t-as="it" t-att-href="it['url']"
+                                   t-attf-class="aajp-cal-item aajp-cal-item-#{it['kind']}" t-att-title="it['label']">
+                                    <t t-if="it['time']"><t t-out="it['time']"/> </t><t t-out="it['label']"/>
+                                </a>
+                            </div>
+                        </t>
+                    </t>
+                </div>
+            </div>
+        </t>
+    </template>
+
+    <!-- ============================== NOTIFICATIONS ============================== -->
+    <template id="page_notifications" name="Candidate Portal Notifications">
+        <t t-call="aa_job_portal.layout">
+            <t t-call="aa_job_portal.page_header" head_icon="'bell'" head_title.translate="Notifications" head_sub.translate="Status updates and interview invitations">
+                <form t-if="aajp_unread" action="/my/jobs/notifications/read_all" method="post" class="m-0">
+                    <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
+                    <button type="submit" class="aajp-btn aajp-btn-light">Mark all as read</button>
+                </form>
+            </t>
+            <div class="aajp-card aajp-table-card">
+                <ul t-if="notifications" class="aajp-list aajp-notifs">
+                    <li t-foreach="notifications" t-as="n" t-attf-class="aajp-notif #{'is-unread' if not n.is_read else ''}">
+                        <a t-attf-href="/my/jobs/notifications/#{n.id}/open" class="aajp-notif-link">
+                            <t t-set="n_icon" t-value="{'application': 'check-square', 'status': 'user-check', 'interview': 'video'}.get(n.notif_type, 'bell')"/>
+                            <t t-set="n_tone" t-value="{'application': 'blue', 'status': 'green', 'interview': 'cyan'}.get(n.notif_type, 'orange')"/>
+                            <span t-attf-class="aajp-tile aajp-tile-#{n_tone}"><t t-out="icon(n_icon, 20)"/></span>
+                            <div class="flex-grow-1 min-w-0">
+                                <div class="aajp-row-title" t-out="n.title"/>
+                                <div t-if="n.body" class="aajp-muted small" t-out="n.body"/>
+                                <div t-if="n.event_id and n.event_id.start" class="aajp-muted small"><t t-out="icon('clock', 14)"/> <t t-out="fmt_dt(n.event_id.start)"/></div>
+                            </div>
+                            <span class="aajp-muted small text-nowrap" t-out="fmt_d(n.create_date)"/>
+                        </a>
+                    </li>
+                </ul>
+                <t t-else="">
+                    <t t-call="aa_job_portal.empty_state" empty_icon="'bell'" empty_title.translate="You're all caught up" empty_text.translate="Application updates and interview invitations will appear here."/>
+                </t>
+            </div>
+        </t>
+    </template>
+
+    <!-- ============================== PROFILE ============================== -->
+    <template id="page_profile" name="Candidate Portal Profile">
+        <t t-call="aa_job_portal.layout">
+            <t t-set="p" t-value="aajp_partner"/>
+            <t t-call="aa_job_portal.page_header" head_icon="'user'" head_title.translate="My Profile" head_sub.translate="Recruiters see these details with every application">
+                <span t-if="p.aa_profile_verified" class="aajp-status aajp-status-success"><t t-out="icon('shield', 15)"/> Verified</span>
+                <span t-else="" class="aajp-status aajp-status-warning">Not verified</span>
+            </t>
+            <div t-if="error" class="aajp-alert aajp-alert-danger" t-out="error"/>
+            <div t-if="saved" class="aajp-alert aajp-alert-success">Your profile was saved.</div>
+            <form action="/my/jobs/profile" method="post" enctype="multipart/form-data" class="aajp-card aajp-section aajp-form">
+                <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
+                <h2 class="aajp-form-title">Personal details</h2>
+                <div class="aajp-form-grid">
+                    <label class="aajp-field"><span>Full name *</span>
+                        <input type="text" name="name" class="form-control" t-att-value="p.name" required="required"/></label>
+                    <label class="aajp-field"><span>Email</span>
+                        <input type="email" class="form-control" t-att-value="p.email" disabled="disabled"/></label>
+                    <label class="aajp-field"><span>Phone</span>
+                        <input type="tel" name="phone" class="form-control" t-att-value="p.phone"/></label>
+                    <label class="aajp-field"><span>LinkedIn profile</span>
+                        <input type="url" name="linkedin_url" class="form-control" t-att-value="p.aa_linkedin_url" placeholder="https://www.linkedin.com/in/…"/></label>
+                </div>
+                <h2 class="aajp-form-title">Career preferences</h2>
+                <div class="aajp-form-grid">
+                    <label class="aajp-field"><span>Desired position</span>
+                        <input type="text" name="headline" class="form-control" t-att-value="p.aa_headline" placeholder="e.g. ERP Consultant"/></label>
+                    <label class="aajp-field"><span>Years of experience</span>
+                        <input type="number" min="0" max="60" name="experience_years" class="form-control" t-att-value="p.aa_experience_years"/></label>
+                    <label class="aajp-field"><span>Key skills</span>
+                        <input type="text" name="skills" class="form-control" t-att-value="p.aa_skills" placeholder="Odoo, Accounting, Python"/></label>
+                    <label class="aajp-field"><span>Preferred location</span>
+                        <input type="text" name="preferred_location" class="form-control" t-att-value="p.aa_preferred_location" placeholder="Riyadh, Saudi Arabia"/></label>
+                </div>
+                <h2 class="aajp-form-title">Résumé / CV</h2>
+                <div t-if="p.aa_cv_attachment_id" class="aajp-cv-current">
+                    <t t-out="icon('file', 18)"/>
+                    <a t-attf-href="/my/jobs/cv/#{p.aa_cv_attachment_id.id}" t-out="p.aa_cv_attachment_id.name"/>
+                </div>
+                <input type="file" name="cv_file" class="form-control" accept=".pdf,.doc,.docx,.odt,.rtf,.txt"/>
+                <p class="aajp-muted small mt-1">PDF, Word, ODT, RTF or TXT — up to 10 MB. Recommended jobs use your position and skills.</p>
+                <label class="aajp-check aajp-confirm">
+                    <input type="checkbox" name="confirm" value="1" t-att-checked="'checked' if p.aa_profile_verified else None"/>
+                    <span>I confirm these details are accurate (marks your profile as verified)</span>
+                </label>
+                <div class="aajp-form-actions">
+                    <button type="submit" class="aajp-btn aajp-btn-primary">Save profile</button>
+                </div>
+            </form>
+        </t>
+    </template>
+</odoo>

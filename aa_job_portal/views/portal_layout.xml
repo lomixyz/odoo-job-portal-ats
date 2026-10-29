@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Application shell: dark sidebar + top bar, without the website header/footer -->
+    <template id="layout" name="Candidate Portal Layout">
+        <t t-call="website.layout" no_header="True" no_footer="True" additional_title="page_title">
+            <div class="aajp-app">
+                <input type="checkbox" id="aajp_nav_toggle" class="aajp-nav-toggle" aria-label="Toggle navigation"/>
+                <aside class="aajp-sidebar">
+                    <div class="aajp-sidebar-inner">
+                    <a href="/my/jobs/profile" class="aajp-brand">
+                        <img class="aajp-brand-avatar" t-attf-src="/web/image/res.partner/#{aajp_partner.id}/avatar_128" alt=""/>
+                        <span class="aajp-brand-text">
+                            <span class="aajp-brand-name" t-out="aajp_partner.name"/>
+                            <span class="aajp-brand-mail" t-out="aajp_partner.email"/>
+                        </span>
+                    </a>
+                    <nav class="aajp-nav">
+                        <a href="/my/jobs" t-attf-class="aajp-nav-link #{'active' if aajp_active == 'dashboard' else ''}">
+                            <t t-out="icon('grid')"/><span>Dashboard</span>
+                        </a>
+                        <div class="aajp-nav-section">Jobs</div>
+                        <a href="/my/jobs/browse" t-attf-class="aajp-nav-link #{'active' if aajp_active == 'browse' else ''}">
+                            <t t-out="icon('search')"/><span>Browse Jobs</span>
+                        </a>
+                        <a href="/my/jobs/applied" t-attf-class="aajp-nav-link #{'active' if aajp_active == 'applied' else ''}">
+                            <t t-out="icon('check-square')"/><span>Applied Jobs</span>
+                            <span t-if="aajp_applied_count" class="aajp-nav-count" t-out="aajp_applied_count"/>
+                        </a>
+                        <a href="/my/jobs/saved" t-attf-class="aajp-nav-link #{'active' if aajp_active == 'saved' else ''}">
+                            <t t-out="icon('bookmark')"/><span>Saved Jobs</span>
+                            <span t-if="aajp_saved_job_ids" class="aajp-nav-count" t-out="len(aajp_saved_job_ids)"/>
+                        </a>
+                        <div class="aajp-nav-section">Scheduling</div>
+                        <a href="/my/jobs/interviews" t-attf-class="aajp-nav-link #{'active' if aajp_active == 'interviews' else ''}">
+                            <t t-out="icon('video')"/><span>Interviews</span>
+                        </a>
+                        <a href="/my/jobs/calendar" t-attf-class="aajp-nav-link #{'active' if aajp_active == 'calendar' else ''}">
+                            <t t-out="icon('calendar')"/><span>Calendar</span>
+                        </a>
+                        <div class="aajp-nav-section">Account</div>
+                        <a href="/my/jobs/profile" t-attf-class="aajp-nav-link #{'active' if aajp_active == 'profile' else ''}">
+                            <t t-out="icon('user')"/><span>My Profile</span>
+                        </a>
+                        <a href="/my/jobs/ats" t-attf-class="aajp-nav-link #{'active' if aajp_active == 'ats' else ''}">
+                            <t t-out="icon('gauge')"/><span>CV Score (ATS)</span>
+                            <span t-if="aajp_partner.aa_ats_report_id" t-attf-class="aajp-nav-count aajp-nav-score aajp-tone-#{ats_tone(aajp_partner.aa_ats_report_id.grade)}" t-out="aajp_partner.aa_ats_report_id.score"/>
+                        </a>
+                        <a href="/my/jobs/notifications" t-attf-class="aajp-nav-link #{'active' if aajp_active == 'notifications' else ''}">
+                            <t t-out="icon('bell')"/><span>Notifications</span>
+                            <span t-if="aajp_unread" class="aajp-nav-count aajp-nav-count-alert" t-out="aajp_unread"/>
+                        </a>
+                    </nav>
+                    <div class="aajp-sidebar-foot">
+                        <a href="/" class="aajp-nav-link"><t t-out="icon('globe')"/><span>Back to Website</span></a>
+                        <form method="POST" action="/web/session/logout?redirect=/" class="m-0">
+                            <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
+                            <button type="submit" class="aajp-nav-link aajp-nav-btn"><t t-out="icon('log-out')"/><span>Sign Out</span></button>
+                        </form>
+                    </div>
+                    </div>
+                </aside>
+                <label for="aajp_nav_toggle" class="aajp-backdrop" aria-hidden="true"/>
+
+                <div class="aajp-main">
+                    <header class="aajp-topbar">
+                        <label for="aajp_nav_toggle" class="aajp-icon-btn aajp-burger" title="Menu"><t t-out="icon('menu', 24)"/></label>
+                        <div class="aajp-topbar-actions">
+                            <a href="/my/jobs/browse" class="aajp-icon-btn" title="Browse Jobs"><t t-out="icon('search', 22)"/></a>
+                            <a href="/my/jobs/interviews" class="aajp-icon-btn aajp-hide-sm" title="Interviews"><t t-out="icon('video', 22)"/></a>
+                            <a href="/my/jobs/calendar" class="aajp-icon-btn aajp-hide-sm" title="Calendar"><t t-out="icon('calendar', 22)"/></a>
+                            <a href="/my/jobs/saved" class="aajp-icon-btn" title="Saved Jobs"><t t-out="icon('bookmark', 22)"/></a>
+                            <a href="/my/jobs/notifications" class="aajp-icon-btn" title="Notifications">
+                                <t t-out="icon('bell', 22)"/>
+                                <span t-if="aajp_unread" class="aajp-dot" t-out="aajp_unread"/>
+                            </a>
+                            <a href="/my/jobs/profile" class="aajp-topbar-avatar" title="My Profile">
+                                <img t-attf-src="/web/image/res.partner/#{aajp_partner.id}/avatar_128" alt=""/>
+                            </a>
+                        </div>
+                    </header>
+                    <div class="aajp-content">
+                        <t t-out="0"/>
+                    </div>
+                </div>
+            </div>
+        </t>
+    </template>
+
+    <!-- Page header card -->
+    <template id="page_header" name="Candidate Portal Page Header">
+        <div class="aajp-card aajp-page-head">
+            <span class="aajp-tile aajp-tile-blue"><t t-out="icon(head_icon, 24)"/></span>
+            <div class="flex-grow-1">
+                <h1 class="aajp-page-title" t-out="head_title"/>
+                <p class="aajp-page-sub" t-out="head_sub"/>
+            </div>
+            <t t-out="0"/>
+        </div>
+    </template>
+</odoo>

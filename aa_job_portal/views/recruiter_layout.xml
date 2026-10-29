@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Recruiter shell (same design as the candidate portal) -->
+    <template id="r_layout" name="Recruiter Dashboard Layout">
+        <t t-set="no_header" t-value="True"/>
+        <t t-set="no_footer" t-value="True"/>
+        <t t-set="additional_title" t-value="page_title"/>
+        <t t-call="website.layout">
+            <div class="aajp-app aajr-app">
+                <input type="checkbox" id="aajp_nav_toggle" class="aajp-nav-toggle" aria-label="Toggle navigation"/>
+                <aside class="aajp-sidebar">
+                    <div class="aajp-sidebar-inner">
+                        <div class="aajp-brand">
+                            <img class="aajp-brand-avatar" t-attf-src="/web/image/res.users/#{aajr_user.id}/avatar_128" alt=""/>
+                            <span class="aajp-brand-text">
+                                <span class="aajp-brand-name" t-out="aajr_user.name"/>
+                                <span class="aajp-brand-mail">
+                                    <t t-if="aajr_is_manager">Recruitment Manager</t>
+                                    <t t-else="">Recruitment Officer</t>
+                                </span>
+                            </span>
+                        </div>
+                        <nav class="aajp-nav">
+                            <a href="/recruiter" t-attf-class="aajp-nav-link #{'active' if aajr_active == 'dashboard' else ''}">
+                                <t t-out="icon('grid')"/><span>Dashboard</span>
+                            </a>
+                            <div class="aajp-nav-section">Recruitment</div>
+                            <a href="/recruiter/jobs" t-attf-class="aajp-nav-link #{'active' if aajr_active == 'jobs' else ''}">
+                                <t t-out="icon('briefcase')"/><span>Job Positions</span>
+                            </a>
+                            <a href="/recruiter/applications" t-attf-class="aajp-nav-link #{'active' if aajr_active == 'applications' else ''}">
+                                <t t-out="icon('users')"/><span>Applications</span>
+                            </a>
+                            <a href="/recruiter/jobs/new" class="aajp-nav-link">
+                                <t t-out="icon('plus')"/><span>New Job</span>
+                            </a>
+                            <div class="aajp-nav-section">Scheduling</div>
+                            <a href="/recruiter/interviews" t-attf-class="aajp-nav-link #{'active' if aajr_active == 'interviews' else ''}">
+                                <t t-out="icon('video')"/><span>Interviews</span>
+                                <span t-if="aajr_upcoming_count" class="aajp-nav-count" t-out="aajr_upcoming_count"/>
+                            </a>
+                            <div class="aajp-nav-section">Odoo</div>
+                            <a t-att-href="aajr_app_url" class="aajp-nav-link">
+                                <t t-out="icon('app')"/><span>Recruitment App</span>
+                            </a>
+                        </nav>
+                        <div class="aajp-sidebar-foot">
+                            <a href="/" class="aajp-nav-link"><t t-out="icon('globe')"/><span>Back to Website</span></a>
+                            <form method="POST" action="/web/session/logout?redirect=/" class="m-0">
+                                <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
+                                <button type="submit" class="aajp-nav-link aajp-nav-btn"><t t-out="icon('log-out')"/><span>Sign Out</span></button>
+                            </form>
+                        </div>
+                    </div>
+                </aside>
+                <label for="aajp_nav_toggle" class="aajp-backdrop" aria-hidden="true"/>
+                <div class="aajp-main">
+                    <header class="aajp-topbar">
+                        <label for="aajp_nav_toggle" class="aajp-icon-btn aajp-burger" title="Menu"><t t-out="icon('menu', 24)"/></label>
+                        <form action="/recruiter/applications" method="get" class="aajr-topsearch">
+                            <t t-out="icon('search', 18)"/>
+                            <input type="search" name="search" placeholder="Search applicants or jobs" t-att-value="search if aajr_active == 'applications' else None"/>
+                            <input type="hidden" name="status" value="all"/>
+                        </form>
+                        <div class="aajp-topbar-actions">
+                            <a href="/recruiter/jobs/new" class="aajp-btn aajp-btn-primary aajr-hide-xs"><t t-out="icon('plus', 18)"/> New Job</a>
+                            <a href="/recruiter/interviews" class="aajp-icon-btn" title="Interviews"><t t-out="icon('calendar', 22)"/>
+                                <span t-if="aajr_upcoming_count" class="aajp-dot" t-out="aajr_upcoming_count"/></a>
+                            <span class="aajp-topbar-avatar"><img t-attf-src="/web/image/res.users/#{aajr_user.id}/avatar_128" alt=""/></span>
+                        </div>
+                    </header>
+                    <div class="aajp-content">
+                        <t t-out="0"/>
+                    </div>
+                </div>
+            </div>
+        </t>
+    </template>
+
+    <!-- Page header (set r_icon / r_title / r_sub before calling) -->
+    <template id="r_header" name="Recruiter Page Header">
+        <div class="aajp-card aajp-page-head">
+            <span class="aajp-tile aajp-tile-blue"><t t-out="icon(r_icon, 24)"/></span>
+            <div class="flex-grow-1 min-w-0">
+                <h1 class="aajp-page-title text-truncate" t-out="r_title"/>
+                <p class="aajp-page-sub" t-out="r_sub"/>
+            </div>
+            <t t-out="0"/>
+        </div>
+    </template>
+
+    <template id="r_status" name="Recruiter Status Pill">
+        <t t-set="st" t-value="r_status(app)"/>
+        <span t-attf-class="aajp-status aajp-status-#{st[1]}" t-out="st[0]"/>
+    </template>
+
+    <template id="r_avatar" name="Recruiter Applicant Initial">
+        <span class="aajr-initial" t-out="(applicant_name(app) or '?')[:1].upper()"/>
+    </template>
+</odoo>

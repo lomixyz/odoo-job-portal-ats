@@ -1,0 +1,5 @@
+id,name,model_id,group_id/id,operation,domain
+access_aa_job_saved_recruiter,aa.job.saved.recruiter,aa.job.saved,hr_recruitment.group_hr_recruitment_user,crud,
+access_aa_job_notification_recruiter,aa.job.notification.recruiter,aa.job.notification,hr_recruitment.group_hr_recruitment_user,crud,
+access_aa_ats_report_recruiter,aa.ats.report.recruiter,aa.ats.report,hr_recruitment.group_hr_recruitment_user,crud,
+access_aa_ats_report_interviewer,aa.ats.report.interviewer,aa.ats.report,hr_recruitment.group_hr_recruitment_interviewer,r,
